@@ -100,8 +100,6 @@ def build_word_report_bytes(records: list[dict], title: str) -> bytes:
         for a in r["missed"]:
             doc.add_paragraph(f" {a}", style="ListBullet")
 
-        doc.add_paragraph("")
-
     buf = io.BytesIO()
     doc.save(buf)
     return buf.getvalue()
