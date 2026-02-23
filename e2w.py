@@ -2,18 +2,22 @@ import io
 import pandas as pd
 import streamlit as st
 from docx import Document
+import csv
 
 def build_mail_merge_dataframe(records: list[dict]) -> pd.DataFrame:
     rows = []
     for r in records:
         first_name = r["name"].split()[0]
+
         rows.append(
             {
                 "FirstName": first_name,
                 "Email": r["email"],
-                "MissedHomeworks": ", ".join(r["missed"]),
+                # KEY CHANGE HERE 👇
+                "MissedHomeworks": "\n".join(r["missed"]),
             }
         )
+
     return pd.DataFrame(rows)
 
 def generate_missed_homework_report(
@@ -210,10 +214,13 @@ def main():
     if records:
         mail_df = build_mail_merge_dataframe(records)
 
-        csv_bytes = mail_df.to_csv(index=False).encode("utf-8")
+        csv_bytes = mail_df.to_csv(
+            index=False,
+            quoting=csv.QUOTE_ALL  # Ensures line breaks are preserved
+        ).encode("utf-8-sig")      # Outlook-friendly encoding (UTF-8 with BOM)
 
         st.download_button(
-            "Download Mail Merge CSV",
+            label="Download Mail Merge CSV",
             data=csv_bytes,
             file_name="mail_merge_data.csv",
             mime="text/csv",
